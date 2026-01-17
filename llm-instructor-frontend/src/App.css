@@ -1,0 +1,27 @@
+.app {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--color-bg-primary);
+}
+
+/* Responsive breakpoint for smaller screens */
+@media (max-width: 1024px) {
+  .progress-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform var(--transition-base);
+  }
+
+  .progress-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .chat-container {
+    width: 100%;
+  }
+}
