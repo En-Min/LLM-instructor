@@ -7,3 +7,8 @@ llm-instructor-frontend/dist/
 __pycache__/
 *.pyc
 .DS_Store
+
+# Profiler/trace files that may contain secrets
+**/profiler/result.sqlite
+**/var/traces/*.json
+*.sqlite
