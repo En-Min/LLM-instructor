@@ -3,16 +3,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Message } from '../types';
+import { WelcomeScreen } from './WelcomeScreen';
 import './Chat.css';
 
 interface ChatProps {
   messages: Message[];
   onSendMessage: (content: string) => void;
+  onFunctionSelect: (functionName: string) => void;
   isConnected: boolean;
   isStreaming: boolean;
+  totalFunctions: number;
+  completedFunctions: number;
 }
 
-export function Chat({ messages, onSendMessage, isConnected, isStreaming }: ChatProps) {
+export function Chat({ messages, onSendMessage, onFunctionSelect, isConnected, isStreaming, totalFunctions, completedFunctions }: ChatProps) {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -59,8 +63,16 @@ export function Chat({ messages, onSendMessage, isConnected, isStreaming }: Chat
         </div>
       </header>
 
-      {/* Messages */}
+      {/* Messages or Welcome Screen */}
       <div className="messages-container">
+        {messages.length === 0 ? (
+          <WelcomeScreen
+            onStartLearning={onFunctionSelect}
+            totalFunctions={totalFunctions}
+            completedFunctions={completedFunctions}
+          />
+        ) : (
+        <>
         <AnimatePresence initial={false}>
           {messages.map((message, index) => (
             <motion.div
@@ -83,9 +95,9 @@ export function Chat({ messages, onSendMessage, isConnected, isStreaming }: Chat
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
-                    code: ({ node, inline, className, children, ...props }) => {
-                      const match = /language-(\w+)/.exec(className || '');
-                      return inline ? (
+                    code: ({ className, children, ...props }) => {
+                      const isInline = !className;
+                      return isInline ? (
                         <code className="inline-code" {...props}>
                           {children}
                         </code>
@@ -127,6 +139,8 @@ export function Chat({ messages, onSendMessage, isConnected, isStreaming }: Chat
         )}
 
         <div ref={messagesEndRef} />
+        </>
+        )}
       </div>
 
       {/* Input */}

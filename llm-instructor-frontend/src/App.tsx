@@ -209,10 +209,17 @@ const mockPhases: AssignmentPhase[] = [
 
 function App() {
   const [sessionId] = useState(1); // TODO: Create session via API
-  const [phases, setPhases] = useState<AssignmentPhase[]>(mockPhases);
+  const [phases, _setPhases] = useState<AssignmentPhase[]>(mockPhases);
   const [currentFunction, setCurrentFunction] = useState<string>();
 
   const { messages, sendMessage, isConnected, isStreaming } = useWebSocket(sessionId);
+
+  // Calculate progress stats
+  const totalFunctions = phases.reduce((sum, phase) => sum + phase.functions.length, 0);
+  const completedFunctions = phases.reduce(
+    (sum, phase) => sum + phase.functions.filter(f => f.status === 'passed').length,
+    0
+  );
 
   // TODO: Fetch progress from API
   useEffect(() => {
@@ -236,8 +243,11 @@ function App() {
       <Chat
         messages={messages}
         onSendMessage={sendMessage}
+        onFunctionSelect={handleFunctionSelect}
         isConnected={isConnected}
         isStreaming={isStreaming}
+        totalFunctions={totalFunctions}
+        completedFunctions={completedFunctions}
       />
     </div>
   );

@@ -1,0 +1,9 @@
+.worktrees/
+backend/.cache/
+backend/instructor.db
+backend/.venv/
+llm-instructor-frontend/node_modules/
+llm-instructor-frontend/dist/
+__pycache__/
+*.pyc
+.DS_Store

@@ -9,44 +9,53 @@ export function useWebSocket(sessionId: number) {
   const streamingMessageRef = useRef<string>('');
 
   useEffect(() => {
-    // Connect to WebSocket
+    // Connect to WebSocket backend
     const ws = new WebSocket(`ws://localhost:8000/ws/chat/${sessionId}`);
     wsRef.current = ws;
 
     ws.onopen = () => {
-      console.log('WebSocket connected');
+      console.log('WebSocket connected to backend');
       setIsConnected(true);
     };
 
     ws.onmessage = (event) => {
       try {
         const data: WebSocketMessage = JSON.parse(event.data);
+        console.log('[WS] Received:', data.type, data.content?.substring(0, 20));
 
         if (data.type === 'assistant_chunk') {
           setIsStreaming(true);
           streamingMessageRef.current += data.content || '';
+          console.log('[WS] Accumulated:', streamingMessageRef.current.length, 'chars');
 
           // Update the last message or create new one
+          const newContent = streamingMessageRef.current;
           setMessages(prev => {
             const lastMessage = prev[prev.length - 1];
+            console.log('[WS] Updating messages, last role:', lastMessage?.role, 'content length:', newContent.length);
             if (lastMessage && lastMessage.role === 'assistant' && lastMessage.id === 'streaming') {
-              return [
+              const updated = [
                 ...prev.slice(0, -1),
                 {
                   ...lastMessage,
-                  content: streamingMessageRef.current,
+                  content: newContent,
                 }
               ];
+              console.log('[WS] Updated existing message, total messages:', updated.length);
+              return updated;
             } else {
-              return [
+              const updated: Message[] = [
                 ...prev,
                 {
                   id: 'streaming',
-                  role: 'assistant',
-                  content: streamingMessageRef.current,
+                  role: 'assistant' as const,
+                  content: newContent,
                   timestamp: new Date(),
+                  llmUsed: 'local',
                 }
               ];
+              console.log('[WS] Created new message, total messages:', updated.length);
+              return updated;
             }
           });
         } else if (data.type === 'assistant_end') {
